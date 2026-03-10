@@ -7,6 +7,38 @@ const Hero = () => {
     <div className="flex-grow w-full bg-gradient-to-b from-sky-50 via-cyan-50 to-sky-100 overflow-hidden">
       {/* Main Content */}
       <main className="flex-grow w-full overflow-y-auto pb-0 mb-0">
+        {/* First Time Order Blinking Alert */}
+        {/* First Time Order Alert */}
+        <div className="bg-green-50 border border-green-400 text-green-900 p-4 rounded-lg shadow-md text-center space-y-3">
+          <p className="font-semibold text-sm sm:text-base">
+            📢 First Time Order?
+          </p>
+
+          <p className="text-sm leading-relaxed">
+            Please call us or contact us on WhatsApp before placing your first
+            order.
+          </p>
+
+          <div className="flex justify-center gap-3 flex-wrap">
+            {/* Call Button */}
+            <a
+              href="tel:9552989143"
+              className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:bg-blue-700 transition"
+            >
+              📞 Call Now
+            </a>
+
+            {/* WhatsApp Button */}
+            <a
+              href="https://wa.me/9630969994"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow hover:bg-green-700 transition"
+            >
+              💬 WhatsApp
+            </a>
+          </div>
+        </div>
         <div className="relative min-h-[35vh] w-full flex flex-col xl:flex-row px-4 py-4 sm:px-3 sm:py-3">
           {/* Text Section */}
           <div className="w-full p-3">

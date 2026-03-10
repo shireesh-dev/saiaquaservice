@@ -54,7 +54,8 @@ const PaymentPage = () => {
   };
 
   const handleNotPaid = () => {
-    navigate(-1);
+    toast.info("You can complete payment later.");
+    navigate("/");
   };
 
   return (

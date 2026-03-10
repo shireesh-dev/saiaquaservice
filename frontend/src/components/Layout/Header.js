@@ -65,34 +65,32 @@ const Header = () => {
         </div>
 
         {/* Mobile Details */}
-        <div className="md:hidden mt-3 space-y-2">
+        <div className="md:hidden mt-3 space-y-3">
+          {/* Address */}
           <p className="text-sky-100 text-xs leading-snug">
             📍 Om Sai Lane No. C6, Anand Park, Dhanori Road, Vishrantwadi, Pune
             – 411015
           </p>
 
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="tel:8459343099"
-              className="flex items-center gap-2 bg-white/20 px-3 py-2 rounded-full"
-            >
-              <FaPhoneAlt className="text-white" />
-              <span className="text-white text-sm font-medium">
-                {" "}
-                Madhavi Khatave : 9552989143
-              </span>
-            </a>
+          {/* Call Button - Strong Highlight */}
+          <a
+            href="tel:9552989143"
+            className="flex items-center justify-center gap-2 bg-amber-400 text-black px-4 py-3 rounded-xl shadow-lg font-bold text-base active:scale-95 transition"
+          >
+            <FaPhoneAlt />
+            Madhavi Khatave : 9552989143
+          </a>
 
-            <a
-              href="https://wa.me/919630969994"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 bg-white/20 px-3 py-2 rounded-full"
-            >
-              <FaWhatsapp className="text-green-300" />
-              <span className="text-white text-sm font-medium">9630969994</span>
-            </a>
-          </div>
+          {/* WhatsApp Button - Strong Highlight */}
+          <a
+            href="https://wa.me/919630969994"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg font-bold text-base active:scale-95 transition"
+          >
+            <FaWhatsapp />
+            9630969994
+          </a>
         </div>
       </div>
     </header>

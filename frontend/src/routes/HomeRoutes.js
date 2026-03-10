@@ -1,4 +1,5 @@
 import AdminLogin from "../pages/AdminLogin";
+import AdminLayout from "../components/Admin/Layout/AdminLayout";
 import Register from "../pages/Register";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
@@ -11,6 +12,7 @@ import AllPaymentsPage from "../pages/AllPaymentsPage";
 
 export {
   AdminLogin,
+  AdminLayout,
   Register,
   HomePage,
   ProfilePage,

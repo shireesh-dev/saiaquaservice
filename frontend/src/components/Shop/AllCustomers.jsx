@@ -93,55 +93,43 @@ const AllCustomers = () => {
           <p className="text-center py-10 text-gray-500">No customers found</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full border divide-y divide-gray-200">
+            <table className="min-w-[900px] w-full border divide-y divide-gray-200 text-sm">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                    Name
-                  </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                    Phone
-                  </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
-                    Address
-                  </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  <th className="px-4 py-2 text-left font-medium">Name</th>
+                  <th className="px-4 py-2 text-left font-medium">Phone</th>
+                  <th className="px-4 py-2 text-left font-medium">Address</th>
+                  <th className="px-4 py-2 text-left font-medium">
                     Customer Type
                   </th>
-                  <th className="px-4 py-2 text-left text-sm font-medium">
-                    Products
-                  </th>
-                  <th className="px-4 py-2 text-center text-sm font-medium">
-                    Action
-                  </th>
+                  <th className="px-4 py-2 text-left font-medium">Products</th>
+                  <th className="px-4 py-2 text-center font-medium">Action</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-gray-200">
                 {filteredCustomers.map((c) => (
-                  <tr
-                    key={c._id}
-                    className="bg-white sm:bg-white mb-4 sm:mb-0 block sm:table-row"
-                  >
-                    <td className="px-4 py-2 block sm:table-cell text-sm font-medium text-gray-800">
+                  <tr key={c._id} className="bg-white">
+                    <td className="px-4 py-2 font-medium text-gray-800">
                       {c.name}
                     </td>
-                    <td className="px-4 py-2 block sm:table-cell text-sm text-gray-600">
-                      {c.phoneNumber}
-                    </td>
-                    <td className="px-4 py-2 block sm:table-cell text-sm text-gray-600">
+
+                    <td className="px-4 py-2 text-gray-600">{c.phoneNumber}</td>
+
+                    <td className="px-4 py-2 text-gray-600">
                       {c.address || "-"}
                     </td>
-                    <td className="px-4 py-2 block sm:table-cell text-sm text-gray-600">
+
+                    <td className="px-4 py-2 text-gray-600">
                       {c.customerType || "-"}
                     </td>
-                    {/* Products Column */}
-                    <td className="px-4 py-2 block sm:table-cell text-sm text-gray-600">
+
+                    <td className="px-4 py-2 text-gray-600">
                       {Array.isArray(c.products) && c.products.length > 0 ? (
-                        <ul className="list-disc ml-4 space-y-1">
+                        <ul className="space-y-1">
                           {c.products.map((p, index) => (
                             <li key={index}>
-                              {p.productName} - Qty: {p.quantity} -{" "}
-                              <span className="font-bold">₹{p.price}</span>
+                              {p.productName} - Qty: {p.quantity} - ₹{p.price}
                             </li>
                           ))}
                         </ul>
@@ -153,7 +141,7 @@ const AllCustomers = () => {
                     <td className="px-4 py-2 text-center">
                       <button
                         onClick={() => handleDelete(c._id, c.name)}
-                        className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700"
+                        className="bg-red-600 text-white px-3 py-1 rounded-md text-sm"
                       >
                         Delete
                       </button>

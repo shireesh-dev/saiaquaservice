@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loadUser } from "./redux/actions/user";
 
 import {
   AdminLogin,
+  AdminLayout,
   Register,
   HomePage,
   EditCustomer,
@@ -22,6 +25,11 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadUser());
+  }, [dispatch]);
   return (
     <BrowserRouter>
       <Routes>
@@ -32,14 +40,17 @@ const App = () => {
         <Route path="/order-success/:orderId" element={<OrderSuccess />} />
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<Register />} />
-        <Route path="/admin/edit-customer" element={<EditCustomer />} />
-        <Route path="/admin/create-customer" element={<CreateCustomer />} />
-        <Route path="/admin/customers" element={<AllCustomers />} />
-        <Route path="/admin/orders" element={<AllOrdersPage />} />
-        <Route path="/admin/payments" element={<AllPaymentsPage />} />
+
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminHomePage />} />
+          <Route path="edit-customer" element={<EditCustomer />} />
+          <Route path="create-customer" element={<CreateCustomer />} />
+          <Route path="customers" element={<AllCustomers />} />
+          <Route path="orders" element={<AllOrdersPage />} />
+          <Route path="payments" element={<AllPaymentsPage />} />
+        </Route>
       </Routes>
 
       <ToastContainer

@@ -100,10 +100,10 @@ const PlaceOrder = () => {
 
   // 🧮 Grand total
   const getGrandTotal = () => {
-    return products.reduce(
-      (sum, p) => sum + (Number(p.price) || 0) * (Number(p.quantity) || 0),
-      0
-    );
+    return products.reduce((sum, p) => {
+      if (!p.selected) return sum; // ignore unselected products
+      return sum + Number(p.price) * Number(p.quantity);
+    }, 0);
   };
 
   // 🔔 Toast handling
@@ -296,7 +296,6 @@ const PlaceOrder = () => {
                   onClick={() => {
                     setIsConfirmed(true);
                     setShowPreview(false);
-                    toast.success("Order confirmed. Please place the order.");
                   }}
                   className="flex-1 bg-emerald-600 text-white py-2 rounded-xl font-semibold"
                 >

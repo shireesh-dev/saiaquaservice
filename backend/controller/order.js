@@ -6,6 +6,7 @@ const Customer = require("../model/customer");
 const ErrorHandler = require("../utils/ErrorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const { isAuthenticated, isAdmin } = require("../middleware/auth");
+const { io } = require("../server");
 
 // PUBLIC: Place an order
 router.post(
@@ -52,6 +53,15 @@ router.post(
     const order = await Order.create({
       customer: customer._id,
       products: orderProducts,
+    });
+
+    // 🔔 5️⃣ Emit notification to admin
+    req.app.locals.io.emit("newOrder", {
+      orderId: order._id,
+      customerName: customer.name,
+      phone: customer.phoneNumber,
+      total: order.orderTotal,
+      createdAt: order.createdAt,
     });
 
     // 5️⃣ Response
@@ -134,8 +144,6 @@ router.put(
     });
   })
 );
-
-
 
 // Public: Search customer by phone number
 router.get(
