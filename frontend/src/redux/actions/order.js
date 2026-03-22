@@ -125,6 +125,170 @@ export const updateOrderStatus = (orderId, orderStatus) => async (dispatch) => {
   }
 };
 
+// Create Regular Customer Order
+export const createRegularOrder =
+  (customerId, deliveryDate, quantity) => async (dispatch) => {
+    try {
+      dispatch({ type: "CreateRegularOrderRequest" });
+
+      const { data } = await axios.post(
+        `${server}/order/admin/regular-order`,
+        {
+          customerId,
+          deliveryDate,
+          quantity,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      dispatch({
+        type: "CreateRegularOrderSuccess",
+        payload: {
+          order: data?.order || null,
+          message: data?.message || "Order created successfully",
+        },
+      });
+
+      // ✅ IMPORTANT: return response for component usage
+      return {
+        success: true,
+        order: data?.order,
+        message: data?.message,
+      };
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create regular customer order";
+
+      dispatch({
+        type: "CreateRegularOrderFail",
+        payload: message,
+      });
+
+      // ✅ IMPORTANT: throw so component can catch
+      throw new Error(message);
+    }
+  };
+
+// Get Orders By Date (Admin)
+
+export const getOrdersByDate = (date) => async (dispatch) => {
+  try {
+    dispatch({ type: "GetOrdersByDateRequest" });
+
+    const { data } = await axios.get(
+      `${server}/order/admin/orders-by-date?date=${date}`,
+      { withCredentials: true }
+    );
+
+    dispatch({
+      type: "GetOrdersByDateSuccess",
+      payload: data.orders,
+    });
+  } catch (error) {
+    dispatch({
+      type: "GetOrdersByDateFail",
+      payload: error?.response?.data?.message || "Failed to fetch orders",
+    });
+  }
+};
+
+// CANCEL ORDER -Admin
+export const deleteOrder = (orderId) => async (dispatch) => {
+  try {
+    dispatch({ type: "DeleteOrderRequest" });
+
+    const { data } = await axios.delete(
+      `${server}/order/admin/cancel-order/${orderId}`,
+      { withCredentials: true }
+    );
+
+    dispatch({
+      type: "DeleteOrderSuccess",
+      payload: data.message,
+    });
+
+    return data;
+  } catch (error) {
+    dispatch({
+      type: "DeleteOrderFail",
+      payload: error.response?.data?.message || error.message,
+    });
+    throw error;
+  }
+};
+
+// Get Customer Monthly Orders
+export const getCustomerMonthlyOrders =
+  (customerId, month, year) => async (dispatch) => {
+    try {
+      dispatch({ type: "GetCustomerMonthlyOrdersRequest" });
+
+      const { data } = await axios.get(
+        `${server}/order/admin/customer-month-orders`,
+        {
+          params: {
+            customerId,
+            month,
+            year,
+          },
+          withCredentials: true,
+        }
+      );
+
+      dispatch({
+        type: "GetCustomerMonthlyOrdersSuccess",
+        payload: data.orders,
+      });
+    } catch (error) {
+      dispatch({
+        type: "GetCustomerMonthlyOrdersFail",
+        payload:
+          error?.response?.data?.message || "Failed to fetch monthly orders",
+      });
+    }
+  };
+
+// 🔹 Share Order (WhatsApp)
+export const shareOrder = (orderId) => async (dispatch) => {
+  try {
+    dispatch({ type: "ShareOrderRequest" });
+
+    const res = await fetch(`${server}/order/${orderId}/share`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // ✅ Open WhatsApp
+      window.open(data.whatsappUrl, "_blank");
+
+      dispatch({
+        type: "ShareOrderSuccess",
+        payload: orderId, // we only need ID to update state
+      });
+    } else {
+      dispatch({
+        type: "ShareOrderFail",
+        payload: data.message,
+      });
+    }
+  } catch (error) {
+    dispatch({
+      type: "ShareOrderFail",
+      payload: error.message,
+    });
+  }
+};
+
 /**
  * 🔄 Clear Errors
  */

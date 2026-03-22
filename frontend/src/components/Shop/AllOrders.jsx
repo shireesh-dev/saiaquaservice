@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   adminGetAllOrders,
   updateOrderStatus,
+  shareOrder,
 } from "../../redux/actions/order";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import socket from "../../socket";
+import { server } from "../../server";
 
 const AllOrders = () => {
   const dispatch = useDispatch();
@@ -134,6 +136,34 @@ const AllOrders = () => {
     setUnreadCount(0);
   };
 
+  // Share on WhatsApp
+  const handleShare = async (orderId) => {
+    try {
+      const res = await fetch(`${server}/order/${orderId}/share`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.whatsappUrl) {
+        window.open(data.whatsappUrl, "_blank");
+        toast.success("Opening WhatsApp...");
+
+        // ✅ IMPORTANT: update global orders (Redux)
+        dispatch({
+          type: "ShareOrderSuccess",
+          payload: orderId,
+        });
+      } else {
+        toast.error(data.message || "Failed to generate WhatsApp link");
+      }
+    } catch (err) {
+      toast.error("Something went wrong");
+      console.error(err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto bg-white rounded-lg shadow p-4 sm:p-6">
@@ -230,6 +260,7 @@ const AllOrders = () => {
                   <th className="px-4 py-2">Total</th>
                   <th className="px-4 py-2">Status</th>
                   <th className="px-4 py-2">Date</th>
+                  <th className="px-4 py-2">Share</th>
                 </tr>
               </thead>
 
@@ -278,6 +309,19 @@ const AllOrders = () => {
 
                     <td className="px-4 py-2">
                       {new Date(o.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => handleShare(o._id)}
+                        disabled={o.shared} // disables button if already shared
+                        className={`px-3 py-1 rounded-md font-semibold ${
+                          o.shared
+                            ? "bg-green-500 text-white cursor-not-allowed"
+                            : "bg-blue-600 text-white"
+                        }`}
+                      >
+                        {o.shared ? "Done" : "Share"}
+                      </button>
                     </td>
                   </tr>
                 ))}

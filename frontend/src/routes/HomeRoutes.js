@@ -1,6 +1,6 @@
 import AdminLogin from "../pages/AdminLogin";
 import AdminLayout from "../components/Admin/Layout/AdminLayout";
-import Register from "../pages/Register";
+import AdminRegister from "../pages/AdminRegister";
 import HomePage from "../pages/HomePage";
 import ProfilePage from "../pages/ProfilePage";
 import EditCustomer from "../pages/EditCust";
@@ -9,11 +9,14 @@ import CreateCustomer from "../pages/CreateCustomer";
 import AllCustomers from "../pages/AllCustomersPage";
 import AllOrdersPage from "../pages/AllOrdersPage";
 import AllPaymentsPage from "../pages/AllPaymentsPage";
+import AllInvoicePage from "../pages/AllInvoicePage";
+import RegularCustomerPage from "../pages/RegularCustomerPage";
 
 export {
   AdminLogin,
   AdminLayout,
-  Register,
+  AdminRegister,
+  RegularCustomerPage,
   HomePage,
   ProfilePage,
   EditCustomer,
@@ -22,4 +25,5 @@ export {
   AllCustomers,
   AllOrdersPage,
   AllPaymentsPage,
+  AllInvoicePage,
 };

@@ -78,9 +78,9 @@ const Hero = () => {
               className="w-[220px] sm:w-[260px] md:w-[300px] object-contain drop-shadow-lg"
             />
 
-            <p className="mt-2 text-sm text-sky-900 font-medium">
-              🚚 <h2> DoorStep Delivery</h2>
-            </p>
+            <div className="mt-2 text-sm text-sky-900 font-medium">
+              🚚 DoorStep Delivery
+            </div>
           </div>
 
           {/* Action Buttons Section */}

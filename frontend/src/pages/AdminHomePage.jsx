@@ -11,6 +11,8 @@ import {
   FaMoneyCheckAlt,
   FaChartBar,
   FaSignOutAlt,
+  FaUserCheck,
+  FaFileInvoice,
 } from "react-icons/fa";
 
 const AdminHomePage = () => {
@@ -61,10 +63,22 @@ const AdminHomePage = () => {
       color: "bg-orange-500",
     },
     {
+      title: "Regular Customers",
+      icon: <FaUserCheck size={22} />,
+      path: "/admin/regular-customers",
+      color: "bg-cyan-600",
+    },
+    {
       title: "Payment Status",
       icon: <FaMoneyCheckAlt size={22} />,
       path: "/admin/payments",
       color: "bg-green-600",
+    },
+    {
+      title: "Invoices", // ✅ NEW
+      icon: <FaFileInvoice size={22} />,
+      path: "/admin/invoices",
+      color: "bg-pink-600",
     },
     {
       title: "Reports",

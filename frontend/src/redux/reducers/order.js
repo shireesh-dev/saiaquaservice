@@ -116,6 +116,90 @@ export const orderReducer = createReducer(initialState, (builder) => {
       state.error = action.payload;
     })
 
+    // Create Regular Order
+
+    .addCase("CreateRegularOrderRequest", (state) => {
+      state.loading = true;
+    })
+
+    .addCase("CreateRegularOrderSuccess", (state, action) => {
+      state.loading = false;
+
+      let newOrder = action.payload?.order;
+
+      if (newOrder) {
+        // ✅ normalize customer field
+        if (typeof newOrder.customer !== "object") {
+          newOrder = {
+            ...newOrder,
+            customer: { _id: newOrder.customer },
+          };
+        }
+
+        state.orders.unshift(newOrder);
+        state.order = newOrder;
+      }
+
+      state.successMessage = action.payload.message;
+    })
+
+    .addCase("CreateRegularOrderFail", (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+
+    .addCase("GetOrdersByDateRequest", (state) => {
+      state.loading = true;
+    })
+    .addCase("GetOrdersByDateSuccess", (state, action) => {
+      state.loading = false;
+
+      // ✅ Always replace with fresh data for selected date
+      state.orders = action.payload || [];
+    })
+    .addCase("GetOrdersByDateFail", (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+
+    // Get Customer Monthly Orders
+
+    .addCase("GetCustomerMonthlyOrdersRequest", (state) => {
+      state.loading = true;
+    })
+
+    .addCase("GetCustomerMonthlyOrdersSuccess", (state, action) => {
+      state.loading = false;
+      state.orders = action.payload;
+    })
+
+    .addCase("GetCustomerMonthlyOrdersFail", (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+
+    // 🔹 Share Orders via whatsapp
+
+    .addCase("ShareOrderRequest", (state) => {
+      state.loading = true;
+    })
+
+    .addCase("ShareOrderSuccess", (state, action) => {
+      state.loading = false;
+
+      // ✅ Update shared flag globally (IMPORTANT FIX)
+      state.orders = state.orders.map((o) =>
+        o._id === action.payload ? { ...o, shared: true } : o
+      );
+
+      state.successMessage = "Order shared successfully";
+    })
+
+    .addCase("ShareOrderFail", (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+
     //clear states
 
     .addCase("ClearOrderErrors", (state) => {

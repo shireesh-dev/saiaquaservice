@@ -7,7 +7,7 @@ import { loadUser } from "./redux/actions/user";
 import {
   AdminLogin,
   AdminLayout,
-  Register,
+  AdminRegister,
   HomePage,
   EditCustomer,
   AdminHomePage,
@@ -15,6 +15,8 @@ import {
   AllCustomers,
   AllOrdersPage,
   AllPaymentsPage,
+  RegularCustomerPage,
+  AllInvoicePage,
 } from "./routes/HomeRoutes";
 
 import PlaceOrder from "./pages/PlaceOrder";
@@ -41,7 +43,13 @@ const App = () => {
 
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/register" element={<Register />} />
+        <Route path="/admin/register" element={<AdminRegister />} />
+        <Route
+          path="/admin/regular-customers"
+          element={<RegularCustomerPage />}
+        />
+
+        <Route path="/admin/invoices" element={<AllInvoicePage />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminHomePage />} />

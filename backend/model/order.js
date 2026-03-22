@@ -46,6 +46,12 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "delivered", "cancelled"],
     default: "pending",
   },
+  deliveryDate: {
+    type: Date,
+    required: false,
+  },
+
+  shared: { type: Boolean, default: false },
 
   createdAt: {
     type: Date,
@@ -68,5 +74,13 @@ orderSchema.pre("save", function (next) {
   this.orderTotal = total;
   next();
 });
+
+orderSchema.index(
+  { customer: 1, deliveryDate: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { deliveryDate: { $exists: true } },
+  }
+);
 
 module.exports = mongoose.model("Order", orderSchema);

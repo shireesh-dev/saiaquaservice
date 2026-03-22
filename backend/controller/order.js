@@ -50,10 +50,13 @@ router.post(
     });
 
     // 4️⃣ Create order (totals calculated in model middleware)
-    const order = await Order.create({
+    let order = await Order.create({
       customer: customer._id,
       products: orderProducts,
     });
+
+    // ✅ 🔥 Populate customer details
+    order = await order.populate("customer", "name phoneNumber address");
 
     // 🔔 5️⃣ Emit notification to admin
     req.app.locals.io.emit("newOrder", {
@@ -70,6 +73,110 @@ router.post(
       message: "Order placed successfully",
       order,
     });
+  })
+);
+
+// Regular Customer - Place Order
+router.post(
+  "/admin/regular-order",
+  isAuthenticated,
+  isAdmin("admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    const { customerId, deliveryDate, quantity } = req.body;
+
+    // 1️⃣ Validate input
+    if (!customerId || !deliveryDate) {
+      return next(
+        new ErrorHandler("Customer ID and delivery date are required", 400)
+      );
+    }
+
+    if (quantity === undefined || quantity === null) {
+      return next(new ErrorHandler("Quantity is required", 400));
+    }
+
+    if (!Number.isInteger(quantity) || quantity < 0 || quantity > 5) {
+      return next(
+        new ErrorHandler("Quantity must be an integer between 0 and 5", 400)
+      );
+    }
+
+    // 2️⃣ If quantity = 0 → do not create order
+    if (quantity === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Quantity is 0, order not created",
+      });
+    }
+
+    // 3️⃣ Normalize delivery date (important)
+    const normalizedDate = new Date(deliveryDate);
+    if (isNaN(normalizedDate)) {
+      return next(new ErrorHandler("Invalid delivery date", 400));
+    }
+    normalizedDate.setHours(0, 0, 0, 0);
+
+    // 4️⃣ Check duplicate order (fast check)
+    const existingOrder = await Order.findOne({
+      customer: customerId,
+      deliveryDate: normalizedDate,
+    }).select("_id");
+
+    if (existingOrder) {
+      return res.status(400).json({
+        success: false,
+        message: "Order already exists for this customer on this date",
+      });
+    }
+
+    // 5️⃣ Fetch customer (only required fields)
+    const customer = await Customer.findById(customerId).select(
+      "customerType products"
+    );
+
+    if (!customer) {
+      return next(new ErrorHandler("Customer not found", 404));
+    }
+
+    if (customer.customerType !== "regular") {
+      return next(new ErrorHandler("Customer is not a regular customer", 400));
+    }
+
+    if (!customer.products || customer.products.length === 0) {
+      return next(new ErrorHandler("Customer has no assigned products", 400));
+    }
+
+    // 6️⃣ Build order products
+    const orderProducts = customer.products.map((p) => ({
+      productName: p.productName,
+      quantity,
+      price: p.price,
+    }));
+
+    // 7️⃣ Create order
+    try {
+      const order = await Order.create({
+        customer: customer._id,
+        deliveryDate: normalizedDate,
+        products: orderProducts,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Regular order created successfully",
+        order,
+      });
+    } catch (error) {
+      // 🔥 Handle duplicate index (race condition safety)
+      if (error.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: "Order already exists (duplicate request)",
+        });
+      }
+
+      return next(error);
+    }
   })
 );
 
@@ -97,7 +204,7 @@ router.get(
   isAdmin("admin"),
   catchAsyncErrors(async (req, res, next) => {
     const orders = await Order.find()
-      .populate("customer", "name phoneNumber")
+      .populate("customer", "name phoneNumber address")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -183,6 +290,149 @@ router.get(
           quantity: p.quantity || 1,
         })),
       },
+    });
+  })
+);
+// Get Orders for a Specific Date -regular customer
+router.get(
+  "/admin/orders-by-date",
+  isAuthenticated,
+  isAdmin("admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    const { date } = req.query;
+
+    if (!date) {
+      return next(new ErrorHandler("Date is required", 400));
+    }
+
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const orders = await Order.find({
+      deliveryDate: { $gte: start, $lte: end },
+    })
+      .populate("customer", "name phoneNumber address")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders,
+    });
+  })
+);
+//Get Monthly Orders for Regular Customer
+router.get(
+  "/admin/customer-month-orders",
+  isAuthenticated,
+  isAdmin("admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    const { customerId, month, year } = req.query;
+
+    if (!customerId || !month || !year) {
+      return next(new ErrorHandler("Customer, month and year required", 400));
+    }
+
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0, 23, 59, 59);
+
+    const orders = await Order.find({
+      customer: customerId,
+      deliveryDate: { $gte: start, $lte: end },
+    }).sort({ deliveryDate: 1 });
+
+    res.status(200).json({
+      success: true,
+      orders,
+    });
+  })
+);
+
+// Cancel Order
+router.delete(
+  "/admin/cancel-order/:id",
+  isAuthenticated,
+  isAdmin("admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return next(new ErrorHandler("Order not found", 404));
+    }
+
+    await order.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+    });
+  })
+);
+
+//Share orders via whatsapp
+router.post(
+  "/:orderId/share",
+  isAuthenticated,
+  isAdmin("admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    const { orderId } = req.params;
+
+    // 1️⃣ Find order and populate customer
+    const order = await Order.findById(orderId).populate(
+      "customer",
+      "name phoneNumber address"
+    );
+
+    if (!order) {
+      return next(new ErrorHandler("Order not found", 404));
+    }
+
+    if (!order.customer?.phoneNumber) {
+      return next(new ErrorHandler("Customer phone number not available", 400));
+    }
+
+    // 2️⃣ Format products
+    const productList = order.products
+      ?.map(
+        (p) => `${p.productName} x ${p.quantity} = ₹${p.price * p.quantity}`
+      )
+      .join("\n");
+
+    // 3️⃣ Customer address
+    const address = order.customer.address || "Address not available";
+
+    // 4️⃣ WhatsApp message
+    const message = `🛒 *Order Details*
+
+👤 Customer: ${order.customer.name}
+📞 Phone: ${order.customer.phoneNumber}
+🏠 Address: ${address}
+
+📦 Products:
+${productList}
+
+💰 Total: ₹${order.orderTotal}
+
+Thank you for your order!`;
+
+    // 5️⃣ Generate WhatsApp URL
+    const phone = order.customer.phoneNumber.replace(/\D/g, "");
+    // NEW ✅ (No phone → allows group selection)
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+      message
+    )}`;
+
+    // 6️⃣ Mark as shared in DB
+    order.shared = true;
+    await order.save();
+
+    // 7️⃣ Respond with link
+    res.status(200).json({
+      success: true,
+      whatsappUrl,
     });
   })
 );
