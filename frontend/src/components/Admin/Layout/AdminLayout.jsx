@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { toast } from "react-toastify";
 import socket from "../../../socket";
+import "../../../Admin.css";
 
 const AdminLayout = () => {
   useEffect(() => {
