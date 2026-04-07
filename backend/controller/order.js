@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../model/order");
+const Invoice = require("../model/invoice");
 const User = require("../model/user");
 const Customer = require("../model/customer");
 const ErrorHandler = require("../utils/ErrorHandler");
@@ -55,7 +56,7 @@ router.post(
       products: orderProducts,
     });
 
-    // ✅ 🔥 Populate customer details
+    // ✅  Populate customer details
     order = await order.populate("customer", "name phoneNumber address");
 
     // 🔔 5️⃣ Emit notification to admin
@@ -167,7 +168,7 @@ router.post(
         order,
       });
     } catch (error) {
-      // 🔥 Handle duplicate index (race condition safety)
+      //  Handle duplicate index (race condition safety)
       if (error.code === 11000) {
         return res.status(400).json({
           success: false,
@@ -437,4 +438,120 @@ Thank you for your order!`;
   })
 );
 
+// Get Orders by Month (ONLY REGULAR CUSTOMERS)
+router.get(
+  "/by-month",
+  isAuthenticated,
+  isAdmin("admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    const { month } = req.query;
+
+    // ✅ 1. Validate
+    if (!month) {
+      return res.status(400).json({
+        success: false,
+        message: "Month is required (format: YYYY-MM)",
+      });
+    }
+
+    const [year, m] = month.split("-");
+    const yearNum = Number(year);
+    const monthNum = Number(m);
+
+    if (!yearNum || !monthNum) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid month format. Use YYYY-MM",
+      });
+    }
+
+    if (monthNum < 1 || monthNum > 12) {
+      return res.status(400).json({
+        success: false,
+        message: "Month must be between 01 and 12",
+      });
+    }
+
+    // ✅ 2. Date Range
+    const start = new Date(yearNum, monthNum - 1, 1);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(yearNum, monthNum, 0);
+    end.setHours(23, 59, 59, 999);
+
+    // ✅ 3. Fetch orders
+    const orders = await Order.find({
+      orderStatus: "delivered",
+      deliveryDate: { $gte: start, $lte: end },
+    })
+      .populate({
+        path: "customer",
+        select: "name phoneNumber address customerType",
+        match: { customerType: "regular" },
+      })
+      .sort({ deliveryDate: -1 });
+
+    // ✅ 4. Remove null customers
+    const filteredOrders = orders.filter((order) => order.customer);
+
+    // ✅ 5. Group orders by customer
+    const grouped = filteredOrders.reduce((acc, order) => {
+      const customerId = order.customer._id.toString();
+
+      if (!acc[customerId]) {
+        acc[customerId] = {
+          customer: order.customer,
+          orders: [],
+          totalOrders: 0,
+          totalAmount: 0,
+        };
+      }
+
+      acc[customerId].orders.push(order);
+      acc[customerId].totalOrders += 1;
+      acc[customerId].totalAmount += order.orderTotal || 0;
+
+      return acc;
+    }, {});
+
+    let groupedOrders = Object.values(grouped);
+
+    //  6. CHECK INVOICE STATUS (FIXED + invoiceId)
+
+    const monthKey = `${yearNum}-${String(monthNum).padStart(2, "0")}`;
+
+    //  Fetch invoices with _id
+    const invoices = await Invoice.find({
+      month: monthKey,
+    }).select("customer _id");
+
+    //  Create lookup map (store invoiceId)
+    const invoiceMap = {};
+    invoices.forEach((inv) => {
+      invoiceMap[inv.customer.toString()] = inv._id; // ✅ store ID
+    });
+
+    //  Attach BOTH status + invoiceId
+    groupedOrders = groupedOrders.map((item) => ({
+      ...item,
+      invoiceGenerated: !!invoiceMap[item.customer._id.toString()],
+      invoiceId: invoiceMap[item.customer._id.toString()] || null, // ✅ ADD THIS
+    }));
+    // ✅ 7. Revenue
+    const totalRevenue = filteredOrders.reduce(
+      (sum, order) => sum + (order.orderTotal || 0),
+      0
+    );
+
+    // ✅ 8. Response
+    res.status(200).json({
+      success: true,
+      count: filteredOrders.length,
+      groupedCount: groupedOrders.length,
+      totalRevenue,
+      orders: filteredOrders,
+      groupedOrders,
+    });
+  })
+);
 module.exports = router;

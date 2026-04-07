@@ -1,12 +1,24 @@
 import { createReducer } from "@reduxjs/toolkit";
 
 const initialState = {
-  // Invoices
+  // Data
   invoices: [],
   invoice: null,
 
-  // Status
+  // Pagination + stats
+  total: 0,
+  page: 1,
+  pages: 1,
+  stats: {},
+
+  // Loading states
   loading: false,
+  createLoading: false,
+  fetchLoading: false,
+  updateLoading: false,
+  deleteLoading: false,
+
+  // Messages
   successMessage: null,
   error: null,
 };
@@ -14,18 +26,27 @@ const initialState = {
 export const invoiceReducer = createReducer(initialState, (builder) => {
   builder
 
-    //create invoice
+    // ===============================
+    // 🔹 CREATE INVOICE
+    // ===============================
     .addCase("CreateInvoiceRequest", (state) => {
-      state.loading = true;
+      state.createLoading = true;
+      state.error = null;
+      state.successMessage = null;
     })
 
     .addCase("CreateInvoiceSuccess", (state, action) => {
-      state.loading = false;
+      state.createLoading = false;
 
       const newInvoice = action.payload;
 
       if (newInvoice) {
-        state.invoices.unshift(newInvoice); // latest first
+        const exists = state.invoices.find((inv) => inv._id === newInvoice._id);
+
+        if (!exists) {
+          state.invoices.unshift(newInvoice);
+        }
+
         state.invoice = newInvoice;
       }
 
@@ -33,30 +54,39 @@ export const invoiceReducer = createReducer(initialState, (builder) => {
     })
 
     .addCase("CreateInvoiceFail", (state, action) => {
-      state.loading = false;
+      state.createLoading = false;
       state.error = action.payload;
     })
 
-    //get All invoices-Admin
+    // ===============================
+    // 🔹 GET ALL INVOICES
+    // ===============================
     .addCase("GetAllInvoicesRequest", (state) => {
-      state.loading = true;
+      state.fetchLoading = true;
+      state.error = null;
     })
 
     .addCase("GetAllInvoicesSuccess", (state, action) => {
-      state.loading = false;
+      state.fetchLoading = false;
 
-      // ✅ If API returns { invoices, total, page... }
       state.invoices = action.payload.invoices || [];
+      state.total = action.payload.total || 0;
+      state.page = action.payload.page || 1;
+      state.pages = action.payload.pages || 1;
+      state.stats = action.payload.stats || {};
     })
 
     .addCase("GetAllInvoicesFail", (state, action) => {
-      state.loading = false;
+      state.fetchLoading = false;
       state.error = action.payload;
     })
 
-    //get single invoice
+    // ===============================
+    // 🔹 GET SINGLE INVOICE
+    // ===============================
     .addCase("GetInvoiceByIdRequest", (state) => {
       state.loading = true;
+      state.error = null;
     })
 
     .addCase("GetInvoiceByIdSuccess", (state, action) => {
@@ -70,23 +100,29 @@ export const invoiceReducer = createReducer(initialState, (builder) => {
     })
 
     // ===============================
-    // 🔹 UPDATE INVOICE PAYMENT (FUTURE READY)
+    // 🔹 UPDATE INVOICE PAYMENT
     // ===============================
     .addCase("UpdateInvoicePaymentRequest", (state) => {
-      state.loading = true;
+      state.updateLoading = true;
+      state.error = null;
+      state.successMessage = null;
     })
 
     .addCase("UpdateInvoicePaymentSuccess", (state, action) => {
-      state.loading = false;
+      state.updateLoading = false;
 
       const updatedInvoice = action.payload;
 
-      // ✅ Update list
-      state.invoices = state.invoices.map((inv) =>
-        inv._id === updatedInvoice._id ? updatedInvoice : inv
+      // Update list (optimized)
+      const index = state.invoices.findIndex(
+        (inv) => inv._id === updatedInvoice._id
       );
 
-      // ✅ Update single invoice
+      if (index !== -1) {
+        state.invoices[index] = updatedInvoice;
+      }
+
+      // Update single
       if (state.invoice?._id === updatedInvoice._id) {
         state.invoice = updatedInvoice;
       }
@@ -95,19 +131,21 @@ export const invoiceReducer = createReducer(initialState, (builder) => {
     })
 
     .addCase("UpdateInvoicePaymentFail", (state, action) => {
-      state.loading = false;
+      state.updateLoading = false;
       state.error = action.payload;
     })
 
     // ===============================
-    // 🔹 DELETE INVOICE (OPTIONAL)
+    // 🔹 DELETE INVOICE
     // ===============================
     .addCase("DeleteInvoiceRequest", (state) => {
-      state.loading = true;
+      state.deleteLoading = true;
+      state.error = null;
+      state.successMessage = null;
     })
 
     .addCase("DeleteInvoiceSuccess", (state, action) => {
-      state.loading = false;
+      state.deleteLoading = false;
 
       state.invoices = state.invoices.filter(
         (inv) => inv._id !== action.payload
@@ -117,11 +155,13 @@ export const invoiceReducer = createReducer(initialState, (builder) => {
     })
 
     .addCase("DeleteInvoiceFail", (state, action) => {
-      state.loading = false;
+      state.deleteLoading = false;
       state.error = action.payload;
     })
 
-    //clear states
+    // ===============================
+    // 🔹 CLEAR STATES
+    // ===============================
     .addCase("ClearInvoiceErrors", (state) => {
       state.error = null;
     })
