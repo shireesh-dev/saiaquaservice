@@ -10,6 +10,7 @@ import AllCustomers from "../pages/AllCustomersPage";
 import AllOrdersPage from "../pages/AllOrdersPage";
 import AllPaymentsPage from "../pages/AllPaymentsPage";
 import AllInvoicePage from "../pages/AllInvoicePage";
+import AllReportPage from "../pages/AllReportPage";
 import RegularCustomerPage from "../pages/RegularCustomerPage";
 
 export {
@@ -26,4 +27,5 @@ export {
   AllOrdersPage,
   AllPaymentsPage,
   AllInvoicePage,
+  AllReportPage,
 };

@@ -39,6 +39,7 @@ const jar = require("./controller/jar");
 const order = require("./controller/order");
 const payment = require("./controller/payment");
 const invoice = require("./controller/invoice");
+const report = require("./controller/report");
 
 app.use("/api/v2/user", user);
 app.use("/api/v2/customer", customer);
@@ -46,6 +47,7 @@ app.use("/api/v2/jar", jar);
 app.use("/api/v2/order", order);
 app.use("/api/v2/payment", payment);
 app.use("/api/v2/invoice", invoice);
+app.use("/api/v2/report", report);
 
 app.use(express.json());
 
