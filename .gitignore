@@ -1,3 +1,24 @@
-config/
+# Environment variables
 .env
-node_modules
+
+# Node modules
+node_modules/
+
+# Config folder (if sensitive)
+config/
+
+#  Backend files
+backend/app.js
+backend/server.js
+
+# Frontend files
+frontend/server.js
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
