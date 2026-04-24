@@ -4,6 +4,8 @@ import { customerReducer } from "./reducers/customer";
 import { orderReducer } from "./reducers/order";
 import { paymentReducer } from "./reducers/payment";
 import { invoiceReducer } from "./reducers/invoice";
+import { contactReducer } from "./reducers/contact";
+import { depositReducer } from "./reducers/deposit";
 
 const Store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const Store = configureStore({
     order: orderReducer,
     payment: paymentReducer,
     invoice: invoiceReducer,
+    contact: contactReducer,
+    deposit: depositReducer,
   },
 });
 

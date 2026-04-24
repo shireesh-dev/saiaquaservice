@@ -24,6 +24,8 @@ import {
   RegularCustomerPage,
   AllInvoicePage,
   AllReportPage,
+  AllContactPage,
+  AllDepositsPage,
 } from "./routes/HomeRoutes";
 
 // Toast notifications
@@ -64,6 +66,8 @@ const App = () => {
           <Route path="customers" element={<AllCustomers />} />
           <Route path="orders" element={<AllOrdersPage />} />
           <Route path="payments" element={<AllPaymentsPage />} />
+          <Route path="/admin/contacts" element={<AllContactPage />} />
+          <Route path="/admin/deposits" element={<AllDepositsPage />} />
         </Route>
       </Routes>
 

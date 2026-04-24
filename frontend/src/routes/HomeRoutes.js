@@ -7,6 +7,8 @@ import EditCustomer from "../pages/EditCust";
 import AdminHomePage from "../pages/AdminHomePage";
 import CreateCustomer from "../pages/CreateCustomer";
 import AllCustomers from "../pages/AllCustomersPage";
+import AllContactPage from "../pages/AllContactPage";
+import AllDepositsPage from "../pages/AllDepositsPage";
 import AllOrdersPage from "../pages/AllOrdersPage";
 import AllPaymentsPage from "../pages/AllPaymentsPage";
 import AllInvoicePage from "../pages/AllInvoicePage";
@@ -24,8 +26,10 @@ export {
   AdminHomePage,
   CreateCustomer,
   AllCustomers,
+  AllContactPage,
   AllOrdersPage,
   AllPaymentsPage,
   AllInvoicePage,
   AllReportPage,
+  AllDepositsPage,
 };
